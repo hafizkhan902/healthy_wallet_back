@@ -33,10 +33,6 @@ const userSchema = new mongoose.Schema({
     default: ''
   },
   settings: {
-    currency: {
-      type: String,
-      default: 'USD'
-    },
     theme: {
       type: String,
       enum: ['light', 'dark'],
@@ -68,15 +64,34 @@ const userSchema = new mongoose.Schema({
     }
   },
   achievements: [{
-    name: String,
-    description: String,
-    earnedAt: {
-      type: Date,
-      default: Date.now
+    achievementId: {
+      type: Number,
+      required: true
+    },
+    name: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
+      required: true
     },
     category: {
       type: String,
-      enum: ['savings', 'goals', 'consistency', 'milestones']
+      enum: ['savings', 'goals', 'consistency', 'milestones'],
+      required: true
+    },
+    icon: {
+      type: String,
+      required: true
+    },
+    points: {
+      type: Number,
+      default: 0
+    },
+    earnedAt: {
+      type: Date,
+      default: Date.now
     }
   }],
   financialSummary: {

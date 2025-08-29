@@ -1,6 +1,7 @@
 const Income = require('../models/Income');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const { triggerAchievementCheck } = require('../utils/achievementHelper');
 
 // @desc    Get all incomes for user
 // @route   GET /api/income
@@ -88,6 +89,9 @@ const createIncome = async (req, res, next) => {
     // Update user's financial summary
     const user = await User.findById(req.user.id);
     await user.updateFinancialSummary();
+
+    // Check for new achievements after income creation
+    await triggerAchievementCheck(req.user);
 
     res.status(201).json({
       success: true,

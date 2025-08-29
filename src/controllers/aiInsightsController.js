@@ -162,8 +162,7 @@ const getSavingsRecommendations = async (req, res, next) => {
     const recommendations = generateSavingsRecommendations(
       expenseAnalysis, 
       totalIncome, 
-      currentSavingsRate, 
-      user.settings.currency
+      currentSavingsRate
     );
 
     res.status(200).json({
@@ -470,7 +469,7 @@ const generateSpendingInsights = (patterns, trends) => {
   return insights;
 };
 
-const generateSavingsRecommendations = (expenses, income, savingsRate, currency) => {
+const generateSavingsRecommendations = (expenses, income, savingsRate) => {
   const recommendations = [];
 
   expenses.forEach(category => {

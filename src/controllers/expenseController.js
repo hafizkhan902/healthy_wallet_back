@@ -1,6 +1,7 @@
 const Expense = require('../models/Expense');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const { triggerAchievementCheck } = require('../utils/achievementHelper');
 
 // @desc    Get all expenses for user
 // @route   GET /api/expenses
@@ -88,6 +89,9 @@ const createExpense = async (req, res, next) => {
     // Update user's financial summary
     const user = await User.findById(req.user.id);
     await user.updateFinancialSummary();
+
+    // Check for new achievements after expense creation
+    await triggerAchievementCheck(req.user);
 
     res.status(201).json({
       success: true,

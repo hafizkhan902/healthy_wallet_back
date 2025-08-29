@@ -115,10 +115,74 @@ const goalSchemas = {
   })
 };
 
+// Settings validation schemas
+const settingsSchemas = {
+  update: Joi.object({
+    // App Settings
+    theme: Joi.string().valid('light', 'dark'),
+    currency: Joi.string().valid(
+      // Major World Currencies
+      'USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'NZD',
+      // Asian Currencies  
+      'BDT', 'INR', 'PKR', 'LKR', 'NPR', 'CNY', 'HKD', 'SGD', 'MYR', 'THB', 'IDR', 'PHP', 'VND', 'KRW', 'TWD',
+      // Middle Eastern Currencies
+      'AED', 'SAR', 'QAR', 'KWD', 'BHD', 'OMR', 'JOD', 'ILS', 'TRY',
+      // African Currencies
+      'ZAR', 'EGP', 'NGN', 'KES', 'GHS', 'MAD', 'TND',
+      // European Currencies (Non-Euro)
+      'NOK', 'SEK', 'DKK', 'PLN', 'CZK', 'HUF', 'RON', 'BGN', 'HRK', 'RSD', 'RUB', 'UAH',
+      // American Currencies
+      'MXN', 'BRL', 'ARS', 'CLP', 'COP', 'PEN', 'UYU', 'BOB', 'PYG',
+      // Other Major Currencies
+      'RMB', 'XAF', 'XOF', 'XCD', 'XPF'
+    ),
+    notifications: Joi.boolean(),
+    budgetAlerts: Joi.boolean(),
+    goalReminders: Joi.boolean(),
+    
+    // Financial Profile
+    financialGoals: Joi.string().max(500),
+    riskTolerance: Joi.string().valid('conservative', 'moderate', 'aggressive', 'very-aggressive'),
+    investmentExperience: Joi.string().valid('beginner', 'intermediate', 'advanced', 'expert'),
+    savingsRate: Joi.number().min(0).max(100),
+    debtAmount: Joi.number().min(0),
+    emergencyFund: Joi.number().min(0),
+    retirementAge: Joi.number().min(50).max(100),
+    dependents: Joi.number().min(0),
+    housingStatus: Joi.string().valid('rent', 'own-mortgage', 'own-outright', 'living-with-family'),
+    employmentStatus: Joi.string().valid('employed', 'part-time', 'self-employed', 'freelancer', 'student', 'retired', 'unemployed'),
+    
+    // Work/Education Settings
+    officeDays: Joi.number().min(0).max(7),
+    transportOffice: Joi.number().min(0),
+    wfhFrequency: Joi.string().valid('never', 'rarely', 'sometimes', 'often', 'always'),
+    educationLevel: Joi.string().valid('high-school', 'undergraduate', 'graduate', 'postgraduate', 'vocational'),
+    transportSchool: Joi.number().min(0),
+    studentType: Joi.string().valid('full-time', 'part-time', 'online', 'evening'),
+    
+    // Lifestyle Settings
+    foodPreference: Joi.string().valid('home-cooked', 'mixed', 'dining-out', 'fast-food', 'organic-healthy', 'budget-conscious'),
+    diningFrequency: Joi.string().valid('daily', 'few-times-week', 'weekly', 'bi-weekly', 'monthly', 'rarely'),
+    impulsiveBuying: Joi.string().valid('very-low', 'low', 'moderate', 'high', 'very-high'),
+    impulsiveSpend: Joi.number().min(0),
+    shoppingFrequency: Joi.string().valid('daily', 'few-times-week', 'weekly', 'bi-weekly', 'monthly', 'quarterly', 'rarely'),
+    entertainmentBudget: Joi.number().min(0),
+    fitnessSpend: Joi.number().min(0),
+    subscriptions: Joi.number().min(0),
+    travelFrequency: Joi.string().valid('monthly', 'quarterly', 'bi-annually', 'annually', 'rarely', 'never'),
+    socialSpending: Joi.string().valid('very-low', 'low', 'moderate', 'high', 'very-high')
+  }),
+  
+  migrate: Joi.object({
+    localStorageData: Joi.object().required()
+  })
+};
+
 module.exports = {
   validate,
   userSchemas,
   incomeSchemas,
   expenseSchemas,
-  goalSchemas
+  goalSchemas,
+  settingsSchemas
 };

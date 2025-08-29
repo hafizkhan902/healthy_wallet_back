@@ -86,7 +86,6 @@ describe('User Management Endpoints', () => {
   describe('PUT /api/users/settings', () => {
     test('Should update user settings', async () => {
       const settingsData = {
-        currency: 'EUR',
         theme: 'dark',
         notifications: {
           email: false,
@@ -106,7 +105,6 @@ describe('User Management Endpoints', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.data.settings.currency).toBe('EUR');
       expect(response.body.data.settings.theme).toBe('dark');
       expect(response.body.data.settings.notifications.email).toBe(false);
       expect(response.body.data.settings.privacy.dataSharing).toBe(false);

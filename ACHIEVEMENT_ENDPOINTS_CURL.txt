@@ -1,0 +1,517 @@
+# HealthyWallet Achievement System - Complete API Reference
+# All endpoints tested and working on port 2000
+# Last updated: 2025-08-28
+
+===============================================================================
+                           AUTHENTICATION REQUIRED
+===============================================================================
+
+All achievement endpoints require JWT authentication. First, login to get your token:
+
+## LOGIN ENDPOINT
+curl -X POST http://localhost:2000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "your-email@example.com",
+    "password": "your-password"
+  }'
+
+RESPONSE:
+{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "user": {
+      "id": "68ac91e278ba5b74fc2bd960",
+      "name": "User Name",
+      "email": "user@example.com",
+      "lastLogin": "2025-08-28T09:47:51.020Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+
+# Use the token in all subsequent requests as: Authorization: Bearer YOUR_TOKEN
+
+===============================================================================
+                          ACHIEVEMENT ENDPOINTS
+===============================================================================
+
+## 1. GET ALL ACHIEVEMENTS WITH PROGRESS
+# Returns all 10 achievement levels with unlock status and progress
+
+curl -X GET http://localhost:2000/api/achievements \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+RESPONSE:
+{
+  "success": true,
+  "data": {
+    "achievements": [
+      {
+        "id": 1,
+        "name": "First Goal Achiever",
+        "description": "Complete your first financial goal within the deadline",
+        "category": "goals",
+        "icon": "🎯",
+        "criteria": "Complete 1 goal on time",
+        "points": 100,
+        "unlocked": true,
+        "earnedAt": "2025-08-28T09:53:11.198Z",
+        "progress": 100
+      },
+      {
+        "id": 2,
+        "name": "Savings Improver",
+        "description": "Save more than your average of the past two months",
+        "category": "savings",
+        "icon": "📈",
+        "criteria": "Monthly savings > 2-month average",
+        "points": 150,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 3,
+        "name": "Consistent Tracker",
+        "description": "Add income or expense entries for 7 consecutive days",
+        "category": "consistency",
+        "icon": "📊",
+        "criteria": "7 consecutive days of entries",
+        "points": 200,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 4,
+        "name": "Budget Master",
+        "description": "Keep expenses under 80% of income for a full month",
+        "category": "savings",
+        "icon": "💰",
+        "criteria": "Monthly expense ratio < 80%",
+        "points": 250,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 5,
+        "name": "Goal Setter",
+        "description": "Create and actively work on 3 different goals simultaneously",
+        "category": "goals",
+        "icon": "🎯",
+        "criteria": "3 active goals with contributions",
+        "points": 300,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 6,
+        "name": "Emergency Fund Builder",
+        "description": "Build an emergency fund worth 3 months of expenses",
+        "category": "milestones",
+        "icon": "🛡️",
+        "criteria": "Emergency fund ≥ 3x monthly expenses",
+        "points": 400,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 7,
+        "name": "Savings Champion",
+        "description": "Maintain a savings rate of 20% or higher for 3 consecutive months",
+        "category": "savings",
+        "icon": "🏆",
+        "criteria": "20%+ savings rate for 3 months",
+        "points": 500,
+        "unlocked": true,
+        "earnedAt": "2025-08-28T09:53:11.966Z",
+        "progress": 100
+      },
+      {
+        "id": 8,
+        "name": "Goal Completionist",
+        "description": "Successfully complete 5 financial goals",
+        "category": "goals",
+        "icon": "⭐",
+        "criteria": "Complete 5 goals total",
+        "points": 600,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 9,
+        "name": "Financial Discipline Master",
+        "description": "Track expenses daily for 30 consecutive days",
+        "category": "consistency",
+        "icon": "📝",
+        "criteria": "30 consecutive days of expense tracking",
+        "points": 750,
+        "unlocked": false,
+        "earnedAt": null,
+        "progress": 0
+      },
+      {
+        "id": 10,
+        "name": "Wealth Builder Legend",
+        "description": "Achieve a net worth growth of 50% from your starting point",
+        "category": "milestones",
+        "icon": "👑",
+        "criteria": "50% net worth growth",
+        "points": 1000,
+        "unlocked": true,
+        "earnedAt": "2025-08-28T09:53:12.300Z",
+        "progress": 100
+      }
+    ],
+    "stats": {
+      "totalAchievements": 10,
+      "unlockedCount": 3,
+      "totalPoints": 1600,
+      "completionPercentage": 30
+    }
+  }
+}
+
+===============================================================================
+
+## 2. MANUALLY CHECK FOR NEW ACHIEVEMENTS
+# Triggers achievement checking logic and returns any newly unlocked achievements
+
+curl -X POST http://localhost:2000/api/achievements/check \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+RESPONSE (when new achievements are found):
+{
+  "success": true,
+  "data": {
+    "newAchievements": [
+      {
+        "id": 2,
+        "name": "Savings Improver",
+        "description": "Save more than your average of the past two months",
+        "category": "savings",
+        "icon": "📈",
+        "criteria": "Monthly savings > 2-month average",
+        "points": 150,
+        "earnedAt": "2025-08-28T10:15:30.123Z"
+      }
+    ],
+    "totalAchievements": 4,
+    "totalPoints": 1750,
+    "message": "Congratulations! You unlocked 1 new achievement!"
+  }
+}
+
+RESPONSE (when no new achievements):
+{
+  "success": true,
+  "data": {
+    "newAchievements": [],
+    "totalAchievements": 3,
+    "totalPoints": 1600,
+    "message": "No new achievements unlocked"
+  }
+}
+
+===============================================================================
+
+## 3. GET ACHIEVEMENT LEADERBOARD
+# Returns ranking of all users by achievement points and count
+
+curl -X GET http://localhost:2000/api/achievements/leaderboard \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+RESPONSE:
+{
+  "success": true,
+  "data": {
+    "leaderboard": [
+      {
+        "_id": "68ac91e278ba5b74fc2bd960",
+        "name": "Hafiz Khan",
+        "achievementCount": 3,
+        "totalPoints": 1600,
+        "lastAchievement": {
+          "achievementId": 10,
+          "name": "Wealth Builder Legend",
+          "description": "Achieve a net worth growth of 50% from your starting point",
+          "category": "milestones",
+          "icon": "👑",
+          "points": 1000,
+          "earnedAt": "2025-08-28T09:53:12.300Z",
+          "_id": "68b02708aeccb574c78a48a4"
+        }
+      },
+      {
+        "_id": "68ac8df0a67bfc7a893959a3",
+        "name": "Test User",
+        "achievementCount": 0,
+        "totalPoints": 0
+      },
+      {
+        "_id": "68ac943978ba5b74fc2bd967",
+        "name": "Test User 1756140600",
+        "achievementCount": 0,
+        "totalPoints": 0
+      },
+      {
+        "_id": "68acc08dbed57bb3c0505ce2",
+        "name": "Taufiq",
+        "achievementCount": 0,
+        "totalPoints": 0
+      }
+    ],
+    "totalUsers": 4
+  }
+}
+
+===============================================================================
+
+## 4. GET USER'S UNLOCKED ACHIEVEMENTS
+# Returns only the achievements the current user has unlocked
+
+curl -X GET http://localhost:2000/api/users/achievements \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json"
+
+RESPONSE:
+{
+  "success": true,
+  "data": {
+    "achievements": [
+      {
+        "achievementId": 1,
+        "name": "First Goal Achiever",
+        "description": "Complete your first financial goal within the deadline",
+        "category": "goals",
+        "icon": "🎯",
+        "points": 100,
+        "earnedAt": "2025-08-28T09:53:11.198Z",
+        "_id": "68b02707aeccb574c78a4887"
+      },
+      {
+        "achievementId": 7,
+        "name": "Savings Champion",
+        "description": "Maintain a savings rate of 20% or higher for 3 consecutive months",
+        "category": "savings",
+        "icon": "🏆",
+        "points": 500,
+        "earnedAt": "2025-08-28T09:53:11.966Z",
+        "_id": "68b02707aeccb574c78a489e"
+      },
+      {
+        "achievementId": 10,
+        "name": "Wealth Builder Legend",
+        "description": "Achieve a net worth growth of 50% from your starting point",
+        "category": "milestones",
+        "icon": "👑",
+        "points": 1000,
+        "earnedAt": "2025-08-28T09:53:12.300Z",
+        "_id": "68b02708aeccb574c78a48a4"
+      }
+    ]
+  }
+}
+
+===============================================================================
+                        FINANCIAL DATA ENDPOINTS
+                    (These actions trigger achievement checks)
+===============================================================================
+
+## CREATE GOAL (Auto-triggers achievement check)
+curl -X POST http://localhost:2000/api/goals \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Emergency Fund Goal",
+    "targetAmount": 5000,
+    "category": "emergency",
+    "targetDate": "2025-12-31T23:59:59.000Z",
+    "description": "Build emergency fund for financial security",
+    "priority": "high"
+  }'
+
+## CONTRIBUTE TO GOAL (Auto-triggers achievement check)
+curl -X POST http://localhost:2000/api/goals/GOAL_ID/contribute \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 1000,
+    "source": "manual",
+    "note": "Monthly contribution to emergency fund"
+  }'
+
+## ADD INCOME (Auto-triggers achievement check)
+curl -X POST http://localhost:2000/api/income \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 4000,
+    "source": "Salary",
+    "category": "salary",
+    "date": "2025-08-28T00:00:00.000Z",
+    "description": "Monthly salary payment"
+  }'
+
+## ADD EXPENSE (Auto-triggers achievement check)
+curl -X POST http://localhost:2000/api/expenses \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 1500,
+    "category": "food",
+    "date": "2025-08-28T00:00:00.000Z",
+    "description": "Monthly groceries and dining"
+  }'
+
+===============================================================================
+                          ACHIEVEMENT CRITERIA
+===============================================================================
+
+LEVEL 1 - First Goal Achiever (100 points)
+- Complete your first financial goal within the deadline
+- Trigger: Complete any goal where currentAmount >= targetAmount within targetDate
+
+LEVEL 2 - Savings Improver (150 points)  
+- Save more than your average of the past two months
+- Trigger: Current month savings > average of previous 2 months
+
+LEVEL 3 - Consistent Tracker (200 points)
+- Add income or expense entries for 7 consecutive days
+- Trigger: Financial entries on 7 consecutive calendar days
+
+LEVEL 4 - Budget Master (250 points)
+- Keep expenses under 80% of income for a full month
+- Trigger: Monthly expense ratio < 80% of monthly income
+
+LEVEL 5 - Goal Setter (300 points)
+- Create and actively work on 3 different goals simultaneously
+- Trigger: Have 3 active goals with contributions in the last 30 days
+
+LEVEL 6 - Emergency Fund Builder (400 points)
+- Build an emergency fund worth 3 months of expenses
+- Trigger: Emergency category goal >= 3x average monthly expenses
+
+LEVEL 7 - Savings Champion (500 points)
+- Maintain a savings rate of 20% or higher for 3 consecutive months
+- Trigger: Savings rate >= 20% for 3 consecutive months
+
+LEVEL 8 - Goal Completionist (600 points)
+- Successfully complete 5 financial goals
+- Trigger: Total completed goals >= 5
+
+LEVEL 9 - Financial Discipline Master (750 points)
+- Track expenses daily for 30 consecutive days
+- Trigger: Expense entries on 30 consecutive calendar days
+
+LEVEL 10 - Wealth Builder Legend (1000 points)
+- Achieve a net worth growth of 50% from your starting point
+- Trigger: Current net worth >= 150% of initial net worth
+
+===============================================================================
+                              ERROR RESPONSES
+===============================================================================
+
+## Authentication Error (401)
+{
+  "success": false,
+  "message": "Access denied. No token provided."
+}
+
+## Invalid Token (401)
+{
+  "success": false,
+  "message": "Invalid token."
+}
+
+## User Not Found (404)
+{
+  "success": false,
+  "message": "User not found"
+}
+
+## Server Error (500)
+{
+  "success": false,
+  "message": "Internal server error",
+  "error": "Error details..."
+}
+
+===============================================================================
+                            TESTING EXAMPLES
+===============================================================================
+
+## Complete Test Sequence to Unlock First 3 Achievements:
+
+# 1. Login
+curl -X POST http://localhost:2000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "password123"}'
+
+# 2. Create a goal
+curl -X POST http://localhost:2000/api/goals \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Test Goal",
+    "targetAmount": 1000,
+    "category": "savings",
+    "targetDate": "2025-12-31T23:59:59.000Z"
+  }'
+
+# 3. Complete the goal
+curl -X POST http://localhost:2000/api/goals/GOAL_ID/contribute \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 1000, "source": "manual", "note": "Complete goal"}'
+
+# 4. Add income for savings calculation
+curl -X POST http://localhost:2000/api/income \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 5000,
+    "source": "Salary",
+    "category": "salary",
+    "date": "2025-08-28T00:00:00.000Z"
+  }'
+
+# 5. Add minimal expenses for high savings rate
+curl -X POST http://localhost:2000/api/expenses \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": 800,
+    "category": "food",
+    "date": "2025-08-28T00:00:00.000Z"
+  }'
+
+# 6. Check achievements
+curl -X GET http://localhost:2000/api/achievements \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json"
+
+===============================================================================
+                                NOTES
+===============================================================================
+
+- All endpoints require JWT authentication
+- Achievements are automatically checked when financial data is added
+- Manual achievement checking is available via POST /api/achievements/check
+- Achievement progress is calculated in real-time
+- Leaderboard is sorted by total points (descending)
+- Achievement categories: goals, savings, consistency, milestones
+- Points range from 100 (Level 1) to 1000 (Level 10)
+- Server runs on port 2000 in development mode
+- All timestamps are in ISO 8601 format (UTC)
+
+===============================================================================

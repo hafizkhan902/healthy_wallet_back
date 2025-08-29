@@ -1,4 +1,5 @@
 const Goal = require('../models/Goal');
+const { triggerAchievementCheck } = require('../utils/achievementHelper');
 
 // @desc    Get all goals for user
 // @route   GET /api/goals
@@ -163,6 +164,9 @@ const addContribution = async (req, res, next) => {
     }
 
     await goal.addContribution(amount, source, note);
+
+    // Check for new achievements after contribution
+    await triggerAchievementCheck(req.user);
 
     res.status(200).json({
       success: true,

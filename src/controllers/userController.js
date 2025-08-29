@@ -84,10 +84,9 @@ const updateProfile = async (req, res, next) => {
 // @access  Private
 const updateSettings = async (req, res, next) => {
   try {
-    const { currency, theme, notifications, privacy } = req.body;
+    const { theme, notifications, privacy } = req.body;
 
     const updateData = {};
-    if (currency) updateData['settings.currency'] = currency;
     if (theme) updateData['settings.theme'] = theme;
     if (notifications) {
       if (notifications.email !== undefined) updateData['settings.notifications.email'] = notifications.email;

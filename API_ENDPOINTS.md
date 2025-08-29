@@ -285,6 +285,61 @@ FRONTEND_URL=http://localhost:3000
 
 ---
 
+## ⚙️ Settings & Profile Endpoints
+
+All routes require authentication (Bearer token)
+
+| Method | Endpoint | Description | Body Parameters |
+|--------|----------|-------------|-----------------|
+| `GET` | `/settings` | Get user settings and profile data | - |
+| `PUT` | `/settings` | Update user settings | `theme`, `currency`, `notifications`, `budgetAlerts`, `goalReminders`, `financialGoals`, `riskTolerance`, `investmentExperience`, `savingsRate`, `debtAmount`, `emergencyFund`, `retirementAge`, `dependents`, `housingStatus`, `employmentStatus`, `officeDays`, `transportOffice`, `wfhFrequency`, `educationLevel`, `transportSchool`, `studentType`, `foodPreference`, `diningFrequency`, `impulsiveBuying`, `impulsiveSpend`, `shoppingFrequency`, `entertainmentBudget`, `fitnessSpend`, `subscriptions`, `travelFrequency`, `socialSpending` |
+| `POST` | `/settings/migrate` | Migrate localStorage data to MongoDB | `localStorageData` (object with healthywallet-* keys) |
+
+### Settings Data Structure
+
+The settings endpoint manages both **App Settings** and **Personalization Profile** data:
+
+#### App Settings
+- `theme`: "light" | "dark"
+- `currency`: "USD" | "EUR" | "GBP"  
+- `notifications`: boolean
+- `budgetAlerts`: boolean
+- `goalReminders`: boolean
+
+#### Financial Profile
+- `financialGoals`: string (text description)
+- `riskTolerance`: "conservative" | "moderate" | "aggressive" | "very-aggressive"
+- `investmentExperience`: "beginner" | "intermediate" | "advanced" | "expert"
+- `savingsRate`: number (0-100)
+- `debtAmount`: number (≥0)
+- `emergencyFund`: number (≥0)
+- `retirementAge`: number (50-100)
+- `dependents`: number (≥0)
+- `housingStatus`: "rent" | "own-mortgage" | "own-outright" | "living-with-family"
+- `employmentStatus`: "employed" | "part-time" | "self-employed" | "freelancer" | "student" | "retired" | "unemployed"
+
+#### Work/Education Settings  
+- `officeDays`: number (0-7)
+- `transportOffice`: number (≥0)
+- `wfhFrequency`: "never" | "rarely" | "sometimes" | "often" | "always"
+- `educationLevel`: "high-school" | "undergraduate" | "graduate" | "postgraduate" | "vocational"
+- `transportSchool`: number (≥0)
+- `studentType`: "full-time" | "part-time" | "online" | "evening"
+
+#### Lifestyle Settings
+- `foodPreference`: "home-cooked" | "mixed" | "dining-out" | "fast-food" | "organic-healthy" | "budget-conscious"
+- `diningFrequency`: "daily" | "few-times-week" | "weekly" | "bi-weekly" | "monthly" | "rarely"
+- `impulsiveBuying`: "very-low" | "low" | "moderate" | "high" | "very-high"
+- `impulsiveSpend`: number (≥0)
+- `shoppingFrequency`: "daily" | "few-times-week" | "weekly" | "bi-weekly" | "monthly" | "quarterly" | "rarely"
+- `entertainmentBudget`: number (≥0)
+- `fitnessSpend`: number (≥0)
+- `subscriptions`: number (≥0)
+- `travelFrequency`: "monthly" | "quarterly" | "bi-annually" | "annually" | "rarely" | "never"
+- `socialSpending`: "very-low" | "low" | "moderate" | "high" | "very-high"
+
+---
+
 ## 📱 Frontend Integration
 
 All endpoints are designed to work seamlessly with your frontend modules:
@@ -296,6 +351,6 @@ All endpoints are designed to work seamlessly with your frontend modules:
 - **Reports & Analytics** → `/reports/*`
 - **AI Insights** → `/ai-insights/*`
 - **Profile Management** → `/users/*`
-- **Settings** → `/users/settings`
+- **Settings & Profile** → `/settings/*`
 
-Total: **50+ API endpoints** covering all your frontend requirements!
+Total: **53+ API endpoints** covering all your frontend requirements!

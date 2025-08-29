@@ -7,6 +7,7 @@ require('dotenv').config();
 const connectDB = require('./config/database');
 const errorHandler = require('./middleware/errorHandler');
 const { requestLogger, errorLogger, logServerStart, apiSummaryLogger } = require('./middleware/logger');
+const { concurrencyLimiter } = require('./middleware/concurrencyControl');
 
 // Import Routes
 const authRoutes = require('./routes/auth');
@@ -16,8 +17,13 @@ const expenseRoutes = require('./routes/expenses');
 const goalRoutes = require('./routes/goals');
 const reportRoutes = require('./routes/reports');
 const aiInsightsRoutes = require('./routes/aiInsights');
+const settingsRoutes = require('./routes/settings');
+const achievementRoutes = require('./routes/achievements');
 
 const app = express();
+
+// Trust proxy for rate limiting (when behind frontend proxy)
+app.set('trust proxy', 1);
 
 // Connect to Database only if not in test environment
 if (process.env.NODE_ENV !== 'test') {
@@ -26,6 +32,9 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Request Logging Middleware (before other middleware)
 app.use(requestLogger);
+
+// Performance Monitoring
+// app.use(performanceMonitor);
 
 // API Summary Logger
 app.use(apiSummaryLogger());
@@ -57,22 +66,39 @@ app.use(express.urlencoded({ extended: true }));
 
 // Health Check Route
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'HealthyWallet API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV
-  });
+  try {
+    const dbState = require('mongoose').connection.readyState;
+    const dbStatus = dbState === 1 ? 'connected' : dbState === 2 ? 'connecting' : 'disconnected';
+    
+    res.status(200).json({
+      success: true,
+      message: 'HealthyWallet API is running',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      database: {
+        status: dbStatus,
+        readyState: dbState
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Health check failed',
+      error: error.message
+    });
+  }
 });
 
-// API Routes
+// API Routes (with concurrency control for data-heavy endpoints)
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/income', incomeRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/goals', goalRoutes);
-app.use('/api/reports', reportRoutes);
-app.use('/api/ai-insights', aiInsightsRoutes);
+app.use('/api/reports', concurrencyLimiter, reportRoutes); // Reports can be resource-intensive
+app.use('/api/ai-insights', concurrencyLimiter, aiInsightsRoutes); // AI operations are heavy
+app.use('/api/settings', settingsRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 // 404 Handler
 app.use('*', (req, res) => {
@@ -93,8 +119,13 @@ const PORT = process.env.PORT || 5000;
 
 // Only start server if not in test environment
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     logServerStart(PORT, process.env.NODE_ENV || 'development');
+  });
+  
+  // Handle server errors
+  server.on('error', (error) => {
+    console.error('❌ Server error:', error);
   });
 }
 
