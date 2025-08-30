@@ -14,26 +14,26 @@ const connectDB = async () => {
       maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
     });
 
-    console.log(`📚 MongoDB Connected: ${conn.connection.host}`);
+    // Silent MongoDB connection (no console output in production)
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {
-      console.error('❌ MongoDB connection error:', err);
+      // Silent MongoDB error handling (no console output in production)
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️  MongoDB disconnected');
+      // Silent MongoDB disconnection (no console output in production)
     });
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
       await mongoose.connection.close();
-      console.log('📚 MongoDB connection closed through app termination');
+      // Silent MongoDB shutdown (no console output in production)
       process.exit(0);
     });
 
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    // Silent database connection error (no console output in production)
     process.exit(1);
   }
 };

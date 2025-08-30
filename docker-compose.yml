@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    networks:
+      - healthywallet-network
+    volumes:
+      - ./logs:/app/logs
+
+  mongo:
+    image: mongo:6
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
+      MONGO_INITDB_DATABASE: healthywallet
+    volumes:
+      - mongo-data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    ports:
+      - "27017:27017"
+    networks:
+      - healthywallet-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - healthywallet-network
+
+volumes:
+  mongo-data:
+
+networks:
+  healthywallet-network:
+    driver: bridge

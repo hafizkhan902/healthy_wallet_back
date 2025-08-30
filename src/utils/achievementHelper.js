@@ -16,7 +16,7 @@ const triggerAchievementCheck = async (user) => {
 
     await checkAndUnlockAchievements(mockReq, mockRes, mockNext);
   } catch (error) {
-    console.error('Achievement check error:', error);
+    // Silent achievement check error (no console output in production)
     // Don't throw error - achievement checks should not affect main operations
   }
 };

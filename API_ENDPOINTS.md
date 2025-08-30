@@ -1,6 +1,11 @@
 # HealthyWallet API Endpoints
 
-Base URL: `http://localhost:5000/api`
+Base URL: `${API_BASE_URL}/api`
+
+**Environment Setup:**
+Set your API base URL before using these endpoints:
+- Production: `export API_BASE_URL="https://your-production-domain.com"`
+- Development: `export API_BASE_URL="${API_BASE_URL}"`
 
 ## 🔐 Authentication Endpoints
 
@@ -204,7 +209,7 @@ Content-Type: application/json
 
 ### 1. Register a new user
 ```bash
-curl -X POST http://localhost:5000/api/auth/register \
+curl -X POST ${API_BASE_URL}/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "name": "John Doe",
@@ -215,7 +220,7 @@ curl -X POST http://localhost:5000/api/auth/register \
 
 ### 2. Login
 ```bash
-curl -X POST http://localhost:5000/api/auth/login \
+curl -X POST ${API_BASE_URL}/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john@example.com",
@@ -225,7 +230,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 
 ### 3. Add Income (with token)
 ```bash
-curl -X POST http://localhost:5000/api/income \
+curl -X POST ${API_BASE_URL}/api/income \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -239,7 +244,7 @@ curl -X POST http://localhost:5000/api/income \
 
 ### 4. Add Expense (with token)
 ```bash
-curl -X POST http://localhost:5000/api/expenses \
+curl -X POST ${API_BASE_URL}/api/expenses \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -252,7 +257,7 @@ curl -X POST http://localhost:5000/api/expenses \
 
 ### 5. Create Financial Goal (with token)
 ```bash
-curl -X POST http://localhost:5000/api/goals \
+curl -X POST ${API_BASE_URL}/api/goals \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -266,7 +271,7 @@ curl -X POST http://localhost:5000/api/goals \
 
 ### 6. Get Dashboard Data (with token)
 ```bash
-curl -X GET http://localhost:5000/api/reports/dashboard \
+curl -X GET ${API_BASE_URL}/api/reports/dashboard \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -276,11 +281,11 @@ curl -X GET http://localhost:5000/api/reports/dashboard \
 
 Make sure your `.env` file contains:
 ```env
-MONGODB_URI=mongodb://localhost:27017/healthywallet
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/healthywallet
 JWT_SECRET=your-super-secret-jwt-key
 PORT=5000
 NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=https://your-frontend-domain.com
 ```
 
 ---

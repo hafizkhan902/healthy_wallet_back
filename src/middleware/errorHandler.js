@@ -2,8 +2,7 @@ const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  // Error logging is handled by logger middleware, so we don't log here
-  // console.error('Error:', err);
+  // Error logging is handled by logger middleware, silent error handling
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {

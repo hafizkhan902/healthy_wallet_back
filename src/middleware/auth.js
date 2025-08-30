@@ -25,7 +25,7 @@ const protect = async (req, res, next) => {
 
       next();
     } catch (error) {
-      console.error('Token verification error:', error);
+      // Silent token verification error (no console output in production)
       return res.status(401).json({
         success: false,
         message: 'Not authorized, token failed'

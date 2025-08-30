@@ -12,10 +12,7 @@ const performanceMonitor = (req, res, next) => {
     
     // Log slow requests (> 1 second)
     if (duration > 1000) {
-      console.warn(`🐌 SLOW REQUEST DETECTED:`);
-      console.warn(`   URL: ${req.method} ${req.originalUrl}`);
-      console.warn(`   Duration: ${duration}ms`);
-      console.warn(`   Memory Delta: ${((endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024).toFixed(2)}MB`);
+      // Silent slow request detection (no console output in production)
     }
     
     // Log memory warnings
@@ -23,7 +20,7 @@ const performanceMonitor = (req, res, next) => {
     const heapUsedMB = memoryUsage.heapUsed / 1024 / 1024;
     
     if (heapUsedMB > 500) { // Warning if using > 500MB
-      console.warn(`⚠️  HIGH MEMORY USAGE: ${heapUsedMB.toFixed(2)}MB`);
+      // Silent high memory usage warning (no console output in production)
     }
   });
   
@@ -65,15 +62,15 @@ const startHealthMonitoring = () => {
     
     // Log warnings for concerning metrics
     if (health.memory.heapUsed > 500) {
-      console.warn(`⚠️  Memory Warning: ${health.memory.heapUsed}MB heap used`);
+      // Silent memory warning (no console output in production)
     }
     
     if (health.system.loadAverage[0] > 2) {
-      console.warn(`⚠️  CPU Warning: Load average ${health.system.loadAverage[0].toFixed(2)}`);
+      // Silent CPU warning (no console output in production)
     }
     
     if (health.system.freeMemory < 500) {
-      console.warn(`⚠️  System Memory Warning: Only ${health.system.freeMemory}MB free`);
+      // Silent system memory warning (no console output in production)
     }
     
   }, 30000); // Check every 30 seconds
@@ -88,23 +85,22 @@ const stopHealthMonitoring = () => {
 // Graceful shutdown handler
 const setupGracefulShutdown = (server) => {
   const shutdown = (signal) => {
-    console.log(`\n🛑 ${signal} received. Starting graceful shutdown...`);
+    // Silent graceful shutdown (no console output in production)
     
     stopHealthMonitoring();
     
     server.close((err) => {
       if (err) {
-        console.error('❌ Error during server shutdown:', err);
+        // Silent error handling (no console output in production)
         process.exit(1);
       }
       
-      console.log('✅ Server closed successfully');
       process.exit(0);
     });
     
     // Force shutdown after 10 seconds
     setTimeout(() => {
-      console.error('❌ Forced shutdown after timeout');
+      // Silent forced shutdown (no console output in production)
       process.exit(1);
     }, 10000);
   };

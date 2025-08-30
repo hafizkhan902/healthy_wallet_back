@@ -1,6 +1,11 @@
 # HealthyWallet Achievement System - Complete API Reference
-# All endpoints tested and working on port 2000
+# Production-ready endpoints with environment variable configuration
 # Last updated: 2025-08-28
+
+# ENVIRONMENT SETUP
+# Set your API base URL before using these commands:
+# export API_BASE_URL="https://your-production-domain.com"
+# For development: export API_BASE_URL="http://localhost:2000"
 
 ===============================================================================
                            AUTHENTICATION REQUIRED
@@ -9,7 +14,7 @@
 All achievement endpoints require JWT authentication. First, login to get your token:
 
 ## LOGIN ENDPOINT
-curl -X POST http://localhost:2000/api/auth/login \
+curl -X POST ${API_BASE_URL}/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "your-email@example.com",
@@ -40,7 +45,7 @@ RESPONSE:
 ## 1. GET ALL ACHIEVEMENTS WITH PROGRESS
 # Returns all 10 achievement levels with unlock status and progress
 
-curl -X GET http://localhost:2000/api/achievements \
+curl -X GET ${API_BASE_URL}/api/achievements \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json"
 
@@ -184,7 +189,7 @@ RESPONSE:
 ## 2. MANUALLY CHECK FOR NEW ACHIEVEMENTS
 # Triggers achievement checking logic and returns any newly unlocked achievements
 
-curl -X POST http://localhost:2000/api/achievements/check \
+curl -X POST ${API_BASE_URL}/api/achievements/check \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json"
 
@@ -226,7 +231,7 @@ RESPONSE (when no new achievements):
 ## 3. GET ACHIEVEMENT LEADERBOARD
 # Returns ranking of all users by achievement points and count
 
-curl -X GET http://localhost:2000/api/achievements/leaderboard \
+curl -X GET ${API_BASE_URL}/api/achievements/leaderboard \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json"
 
@@ -279,7 +284,7 @@ RESPONSE:
 ## 4. GET USER'S UNLOCKED ACHIEVEMENTS
 # Returns only the achievements the current user has unlocked
 
-curl -X GET http://localhost:2000/api/users/achievements \
+curl -X GET ${API_BASE_URL}/api/users/achievements \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json"
 
@@ -328,7 +333,7 @@ RESPONSE:
 ===============================================================================
 
 ## CREATE GOAL (Auto-triggers achievement check)
-curl -X POST http://localhost:2000/api/goals \
+curl -X POST ${API_BASE_URL}/api/goals \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -341,7 +346,7 @@ curl -X POST http://localhost:2000/api/goals \
   }'
 
 ## CONTRIBUTE TO GOAL (Auto-triggers achievement check)
-curl -X POST http://localhost:2000/api/goals/GOAL_ID/contribute \
+curl -X POST ${API_BASE_URL}/api/goals/GOAL_ID/contribute \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -351,7 +356,7 @@ curl -X POST http://localhost:2000/api/goals/GOAL_ID/contribute \
   }'
 
 ## ADD INCOME (Auto-triggers achievement check)
-curl -X POST http://localhost:2000/api/income \
+curl -X POST ${API_BASE_URL}/api/income \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -363,7 +368,7 @@ curl -X POST http://localhost:2000/api/income \
   }'
 
 ## ADD EXPENSE (Auto-triggers achievement check)
-curl -X POST http://localhost:2000/api/expenses \
+curl -X POST ${API_BASE_URL}/api/expenses \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -453,12 +458,12 @@ LEVEL 10 - Wealth Builder Legend (1000 points)
 ## Complete Test Sequence to Unlock First 3 Achievements:
 
 # 1. Login
-curl -X POST http://localhost:2000/api/auth/login \
+curl -X POST ${API_BASE_URL}/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "test@example.com", "password": "password123"}'
 
 # 2. Create a goal
-curl -X POST http://localhost:2000/api/goals \
+curl -X POST ${API_BASE_URL}/api/goals \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -469,13 +474,13 @@ curl -X POST http://localhost:2000/api/goals \
   }'
 
 # 3. Complete the goal
-curl -X POST http://localhost:2000/api/goals/GOAL_ID/contribute \
+curl -X POST ${API_BASE_URL}/api/goals/GOAL_ID/contribute \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"amount": 1000, "source": "manual", "note": "Complete goal"}'
 
 # 4. Add income for savings calculation
-curl -X POST http://localhost:2000/api/income \
+curl -X POST ${API_BASE_URL}/api/income \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -486,7 +491,7 @@ curl -X POST http://localhost:2000/api/income \
   }'
 
 # 5. Add minimal expenses for high savings rate
-curl -X POST http://localhost:2000/api/expenses \
+curl -X POST ${API_BASE_URL}/api/expenses \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -496,7 +501,7 @@ curl -X POST http://localhost:2000/api/expenses \
   }'
 
 # 6. Check achievements
-curl -X GET http://localhost:2000/api/achievements \
+curl -X GET ${API_BASE_URL}/api/achievements \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json"
 

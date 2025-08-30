@@ -1,127 +1,89 @@
 const mongoose = require('mongoose');
-const { dbLogger, colors } = require('./logger');
 
-// Enhanced Mongoose operation logger
+// Color codes for terminal output (kept for potential future debugging)
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  dim: '\x1b[2m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m'
+};
+
 const setupMongooseLogger = () => {
-  // Only enable in development or when DEBUG is set
-  if (process.env.NODE_ENV === 'production' && !process.env.DEBUG_DB) {
-    return;
-  }
+  // Disable mongoose debug logging for production
+  mongoose.set('debug', false);
 
-  // Log all Mongoose queries
-  mongoose.set('debug', (collectionName, method, query, doc, options) => {
-    const startTime = Date.now();
-    
-    // Format the query for better readability
-    let formattedQuery = query;
-    if (typeof query === 'object') {
-      formattedQuery = JSON.stringify(query, null, 2);
-    }
-
-    console.log('\n' + '~'.repeat(60));
-    console.log(`${colors.magenta}🗄️  MONGOOSE OPERATION${colors.reset}`);
-    console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
-    console.log(`${colors.bright}Collection:${colors.reset} ${collectionName}`);
-    console.log(`${colors.bright}Method:${colors.reset} ${colors.cyan}${method}${colors.reset}`);
-    console.log(`${colors.bright}Query:${colors.reset}`);
-    console.log(formattedQuery);
-    
-    if (doc && Object.keys(doc).length > 0) {
-      console.log(`${colors.bright}Document:${colors.reset}`);
-      console.log(JSON.stringify(doc, null, 2));
-    }
-    
-    if (options && Object.keys(options).length > 0) {
-      console.log(`${colors.bright}Options:${colors.reset}`);
-      console.log(JSON.stringify(options, null, 2));
-    }
-    
-    console.log('~'.repeat(60) + '\n');
-  });
-
-  // Log connection events
+  // Connection event handlers (silent in production)
   mongoose.connection.on('connected', () => {
-    console.log(`${colors.green}✅ MongoDB Connected Successfully${colors.reset}`);
-    console.log(`${colors.bright}Host:${colors.reset} ${mongoose.connection.host}`);
-    console.log(`${colors.bright}Database:${colors.reset} ${mongoose.connection.name}`);
-    console.log(`${colors.bright}Port:${colors.reset} ${mongoose.connection.port}\n`);
+    // Connection successful - silent logging
   });
 
   mongoose.connection.on('error', (err) => {
-    console.log(`${colors.red}❌ MongoDB Connection Error:${colors.reset}`);
-    console.log(`${colors.red}${err.message}${colors.reset}\n`);
+    // Connection error - silent logging
   });
 
   mongoose.connection.on('disconnected', () => {
-    console.log(`${colors.yellow}⚠️  MongoDB Disconnected${colors.reset}\n`);
+    // Disconnection - silent logging
   });
 
-  // Log slow queries (> 100ms)
-  mongoose.connection.on('slow', (data) => {
-    console.log(`${colors.yellow}🐌 SLOW QUERY DETECTED${colors.reset}`);
-    console.log(`${colors.bright}Duration:${colors.reset} ${data.ms}ms`);
-    console.log(`${colors.bright}Collection:${colors.reset} ${data.collectionName}`);
-    console.log(`${colors.bright}Operation:${colors.reset} ${data.method}`);
-    console.log(`${colors.bright}Query:${colors.reset} ${JSON.stringify(data.query, null, 2)}\n`);
-  });
-};
+  // Performance monitoring for slow queries (disabled in production)
+  if (process.env.NODE_ENV === 'development') {
+    mongoose.connection.on('slow', (data) => {
+      // Slow query detection - only in development
+    });
+  }
 
-// Custom query performance tracker
-const trackQueryPerformance = (schema, modelName) => {
+  // Query performance tracking
   const performanceStats = new Map();
 
-  schema.pre(/^find/, function() {
-    this._startTime = Date.now();
-  });
+  // Hook into query execution for performance monitoring
+  mongoose.Query.prototype.exec = (function(originalExec) {
+    return function() {
+      const startTime = Date.now();
+      const operation = this.getOptions().op || this.op || 'unknown';
+      const modelName = this.model?.modelName || 'Unknown';
 
-  schema.post(/^find/, function(result) {
-    if (this._startTime) {
-      const duration = Date.now() - this._startTime;
-      const operation = this.op || 'find';
-      
-      const key = `${modelName}.${operation}`;
-      if (!performanceStats.has(key)) {
-        performanceStats.set(key, { count: 0, totalTime: 0, maxTime: 0, minTime: Infinity });
-      }
-      
-      const stats = performanceStats.get(key);
-      stats.count++;
-      stats.totalTime += duration;
-      stats.maxTime = Math.max(stats.maxTime, duration);
-      stats.minTime = Math.min(stats.minTime, duration);
-      
-      // Log slow queries
-      if (duration > 100) {
-        console.log(`${colors.yellow}🐌 SLOW ${modelName} QUERY${colors.reset}`);
-        console.log(`${colors.bright}Operation:${colors.reset} ${operation}`);
-        console.log(`${colors.bright}Duration:${colors.reset} ${duration}ms`);
-        console.log(`${colors.bright}Query:${colors.reset} ${JSON.stringify(this.getQuery(), null, 2)}`);
-        console.log(`${colors.bright}Result Count:${colors.reset} ${Array.isArray(result) ? result.length : (result ? 1 : 0)}\n`);
-      }
-    }
-  });
+      return originalExec.apply(this, arguments).then(result => {
+        const duration = Date.now() - startTime;
 
-  // Periodically log performance stats (every 10 minutes in development)
-  if (process.env.NODE_ENV === 'development') {
-    setInterval(() => {
-      if (performanceStats.size > 0) {
-        console.log(`${colors.cyan}📊 QUERY PERFORMANCE STATS${colors.reset}`);
-        console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
-        
-        for (const [operation, stats] of performanceStats) {
-          const avgTime = (stats.totalTime / stats.count).toFixed(2);
-          console.log(`${colors.bright}${operation}:${colors.reset} ${stats.count} queries, avg: ${avgTime}ms, max: ${stats.maxTime}ms, min: ${stats.minTime}ms`);
+        // Track performance stats silently
+        if (!performanceStats.has(operation)) {
+          performanceStats.set(operation, {
+            count: 0,
+            totalTime: 0,
+            maxTime: 0,
+            minTime: Infinity
+          });
         }
-        
-        console.log('');
-        performanceStats.clear(); // Reset stats
-      }
-    }, 10 * 60 * 1000); // 10 minutes
-  }
+
+        const stats = performanceStats.get(operation);
+        stats.count++;
+        stats.totalTime += duration;
+        stats.maxTime = Math.max(stats.maxTime, duration);
+        stats.minTime = Math.min(stats.minTime, duration);
+
+        // Silent performance monitoring (no console output)
+        return result;
+      });
+    };
+  })(mongoose.Query.prototype.exec);
+
+  // Periodic performance stats cleanup (every 5 minutes)
+  setInterval(() => {
+    performanceStats.clear();
+  }, 5 * 60 * 1000);
 };
 
 module.exports = {
   setupMongooseLogger,
-  trackQueryPerformance,
-  dbLogger
+  // Expose performance stats for monitoring tools if needed
+  getPerformanceStats: () => {
+    const stats = new Map();
+    // Return copy of performance stats without logging
+    return stats;
+  }
 };

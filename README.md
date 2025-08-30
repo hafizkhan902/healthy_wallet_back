@@ -44,7 +44,7 @@ src/
    
    Update the `.env` file with your configuration:
    ```env
-   MONGODB_URI=mongodb://localhost:27017/healthywallet
+   MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/healthywallet
    JWT_SECRET=your-super-secret-jwt-key
    PORT=5000
    NODE_ENV=development
@@ -203,12 +203,12 @@ npm run migrate
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/healthywallet` |
+| `MONGODB_URI` | MongoDB connection string | `mongodb+srv://username:password@cluster.mongodb.net/healthywallet` |
 | `JWT_SECRET` | JWT signing secret | - |
 | `JWT_EXPIRE` | JWT expiration time | `24h` |
 | `PORT` | Server port | `5000` |
 | `NODE_ENV` | Environment mode | `development` |
-| `FRONTEND_URL` | Frontend URL for CORS | `http://localhost:3000` |
+| `FRONTEND_URL` | Frontend URL for CORS | `https://your-frontend-domain.com` |
 
 ## 📝 License
 
