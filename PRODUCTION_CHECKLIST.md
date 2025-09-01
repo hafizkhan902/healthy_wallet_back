@@ -160,7 +160,7 @@ curl -X GET ${API_BASE_URL}/api/achievements \
 ## 📈 **Monitoring & Maintenance**
 
 ### **Health Monitoring**
-- Health check endpoint: `${API_BASE_URL}/health`
+- Health check endpoint: `${API_BASE_URL}/api/health`
 - Returns database status and server information
 - Use for uptime monitoring services
 

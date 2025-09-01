@@ -318,11 +318,11 @@ rm -rf $BACKUP_DIR
 ### 10. Health Checks and Monitoring
 
 #### Health Check Endpoint
-The API includes a health check endpoint at `/health`:
+The API includes a health check endpoint at `/api/health`:
 
 ```bash
 # Test health check
-curl https://api.yourdomain.com/health
+curl https://api.yourdomain.com/api/health
 ```
 
 #### Monitoring Tools
@@ -384,10 +384,10 @@ curl -X POST ${API_BASE_URL}/api/auth/login \
   -d '{"email": "test@example.com", "password": "password123"}'
 
 # Test health check
-curl ${API_BASE_URL}/health
+curl ${API_BASE_URL}/api/health
 
 # Test rate limiting
-for i in {1..10}; do curl ${API_BASE_URL}/health; done
+for i in {1..10}; do curl ${API_BASE_URL}/api/health; done
 ```
 
 ### 13. Troubleshooting

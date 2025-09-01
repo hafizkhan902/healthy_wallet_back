@@ -73,9 +73,39 @@ const requestLogger = () => {
     const startTime = Date.now();
     req.startTime = startTime;
     
-    // Silent request logging (no console output in production)
-    if (process.env.ENABLE_REQUEST_LOGGING === 'true' && process.env.NODE_ENV === 'development') {
-      // Development logging would go here, but disabled for production
+    // Debug request logging (enabled via environment variable)
+    if (process.env.ENABLE_DEBUG_LOGGING === 'true') {
+      console.log('\n' + '='.repeat(80));
+      console.log(`${colors.cyan}📥 INCOMING REQUEST${colors.reset} [ID: ${requestId}]`);
+      console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
+      console.log(`${colors.bright}Method:${colors.reset} ${getColoredMethod(req.method)}`);
+      console.log(`${colors.bright}URL:${colors.reset} ${req.originalUrl}`);
+      console.log(`${colors.bright}IP:${colors.reset} ${req.ip || req.connection.remoteAddress}`);
+      console.log(`${colors.bright}User-Agent:${colors.reset} ${req.get('User-Agent') || 'Unknown'}`);
+      
+      // Log headers (sanitized)
+      const sanitizedHeaders = sanitizeData(req.headers);
+      console.log(`${colors.bright}Headers:${colors.reset}`);
+      console.log(formatJSON(sanitizedHeaders, 300));
+      
+      // Log query parameters
+      if (Object.keys(req.query).length > 0) {
+        console.log(`${colors.bright}Query Params:${colors.reset}`);
+        console.log(formatJSON(req.query, 200));
+      }
+      
+      // Log request body (sanitized)
+      if (req.body && Object.keys(req.body).length > 0) {
+        console.log(`${colors.bright}Request Body:${colors.reset}`);
+        const sanitizedBody = sanitizeData(req.body);
+        console.log(formatJSON(sanitizedBody, 400));
+      }
+      
+      // Log route parameters
+      if (req.params && Object.keys(req.params).length > 0) {
+        console.log(`${colors.bright}Route Params:${colors.reset}`);
+        console.log(formatJSON(req.params, 100));
+      }
     }
 
     // Capture response body for logging
@@ -96,9 +126,34 @@ const responseLogger = () => {
       const duration = Date.now() - req.startTime;
       const requestId = req.requestId;
       
-      // Silent response logging (no console output in production)
-      if (process.env.ENABLE_REQUEST_LOGGING === 'true' && process.env.NODE_ENV === 'development') {
-        // Development logging would go here, but disabled for production
+      // Debug response logging (enabled via environment variable)
+      if (process.env.ENABLE_DEBUG_LOGGING === 'true') {
+        console.log('\n' + '-'.repeat(80));
+        console.log(`${colors.cyan}📤 OUTGOING RESPONSE${colors.reset} [ID: ${requestId}]`);
+        console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
+        console.log(`${colors.bright}Status:${colors.reset} ${getColoredStatus(res.statusCode)}`);
+        console.log(`${colors.bright}Duration:${colors.reset} ${duration}ms`);
+        
+        // Log response headers
+        console.log(`${colors.bright}Response Headers:${colors.reset}`);
+        console.log(formatJSON(res.getHeaders(), 200));
+        
+        // Log response body (sanitized and truncated)
+        if (res.responseBody) {
+          console.log(`${colors.bright}Response Body:${colors.reset}`);
+          try {
+            const responseData = typeof res.responseBody === 'string' ? JSON.parse(res.responseBody) : res.responseBody;
+            const sanitizedResponse = sanitizeData(responseData);
+            console.log(formatJSON(sanitizedResponse, 500));
+          } catch (parseError) {
+            console.log(res.responseBody.toString().substring(0, 500) + '...');
+          }
+        }
+        
+        // Performance indicator
+        const performanceIcon = duration < 100 ? '⚡' : duration < 500 ? '🐎' : duration < 1000 ? '🐌' : '🔥';
+        console.log(`${colors.bright}Performance:${colors.reset} ${performanceIcon} ${duration}ms`);
+        console.log('='.repeat(80) + '\n');
       }
 
       // Store metrics for monitoring tools if needed
@@ -121,9 +176,43 @@ const responseLogger = () => {
 const errorLogger = (err, req, res, next) => {
   const requestId = req.requestId || 'unknown';
   
-  // Silent error logging (no console output in production)
-  if (process.env.ENABLE_ERROR_LOGGING === 'true' && process.env.NODE_ENV === 'development') {
-    // Development error logging would go here, but disabled for production
+  // Debug error logging (enabled via environment variable)
+  if (process.env.ENABLE_DEBUG_LOGGING === 'true') {
+    console.log('\n' + '!'.repeat(80));
+    console.log(`${colors.red}❌ ERROR OCCURRED${colors.reset} [ID: ${requestId}]`);
+    console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
+    console.log(`${colors.bright}Request:${colors.reset} ${getColoredMethod(req.method)} ${req.originalUrl}`);
+    console.log(`${colors.bright}Error Name:${colors.reset} ${err.name || 'Unknown Error'}`);
+    console.log(`${colors.bright}Error Message:${colors.reset} ${colors.red}${err.message}${colors.reset}`);
+    
+    // Show stack trace in development
+    if (process.env.NODE_ENV === 'development' || process.env.ENABLE_DEBUG_LOGGING === 'true') {
+      console.log(`${colors.bright}Stack Trace:${colors.reset}`);
+      console.log(`${colors.dim}${err.stack}${colors.reset}`);
+    }
+    
+    // Log additional error details
+    if (err.code) {
+      console.log(`${colors.bright}Error Code:${colors.reset} ${err.code}`);
+    }
+    
+    if (err.statusCode || err.status) {
+      console.log(`${colors.bright}Status Code:${colors.reset} ${getColoredStatus(err.statusCode || err.status)}`);
+    }
+    
+    // Log user context if available
+    if (req.user) {
+      console.log(`${colors.bright}User Context:${colors.reset} ID=${req.user.id}, Email=${req.user.email}`);
+    }
+    
+    // Log request body that caused the error (sanitized)
+    if (req.body && Object.keys(req.body).length > 0) {
+      console.log(`${colors.bright}Request Body (at error):${colors.reset}`);
+      const sanitizedBody = sanitizeData(req.body);
+      console.log(formatJSON(sanitizedBody, 300));
+    }
+    
+    console.log('!'.repeat(80) + '\n');
   }
 
   // Store error for monitoring tools if needed
@@ -151,9 +240,26 @@ const errorLogger = (err, req, res, next) => {
 // Database query logger
 const dbLogger = {
   logQuery: (operation, collection, query, result = null, duration = 0) => {
-    // Silent database logging (no console output in production)
-    if (process.env.ENABLE_REQUEST_LOGGING === 'true' && process.env.NODE_ENV === 'development') {
-      // Development database logging would go here, but disabled for production
+    // Debug database logging (enabled via environment variable)
+    if (process.env.ENABLE_DEBUG_LOGGING === 'true') {
+      console.log('\n' + '~'.repeat(60));
+      console.log(`${colors.magenta}🗄️  DATABASE OPERATION${colors.reset}`);
+      console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
+      console.log(`${colors.bright}Operation:${colors.reset} ${operation.toUpperCase()}`);
+      console.log(`${colors.bright}Collection:${colors.reset} ${collection}`);
+      console.log(`${colors.bright}Query:${colors.reset}`);
+      console.log(formatJSON(query, 300));
+      
+      if (result !== null) {
+        console.log(`${colors.bright}Result Count:${colors.reset} ${Array.isArray(result) ? result.length : (result ? 1 : 0)}`);
+      }
+      
+      if (duration > 0) {
+        const perfIcon = duration < 50 ? '⚡' : duration < 200 ? '🐎' : duration < 500 ? '🐌' : '🔥';
+        console.log(`${colors.bright}Duration:${colors.reset} ${perfIcon} ${duration}ms`);
+      }
+      
+      console.log('~'.repeat(60) + '\n');
     }
 
     // Store query metrics for monitoring if needed
@@ -195,9 +301,16 @@ const apiSummaryLogger = () => {
 
 // Server start logger
 const logServerStart = (port, environment) => {
-  // Silent server start (no console output in production)
-  if (process.env.NODE_ENV === 'development') {
-    // Development server start logging would go here, but disabled for production
+  // Debug server start logging (enabled via environment variable)
+  if (process.env.ENABLE_DEBUG_LOGGING === 'true') {
+    console.log('\n' + '🚀'.repeat(20));
+    console.log(`${colors.green}${colors.bright}HealthyWallet API Server Started!${colors.reset}`);
+    console.log(`${colors.bright}Port:${colors.reset} ${colors.cyan}${port}${colors.reset}`);
+    console.log(`${colors.bright}Environment:${colors.reset} ${colors.yellow}${environment}${colors.reset}`);
+    console.log(`${colors.bright}Timestamp:${colors.reset} ${new Date().toISOString()}`);
+    console.log(`${colors.bright}Health Check:${colors.reset} ${process.env.BASE_URL || `http://localhost:${port}`}/api/health`);
+    console.log(`${colors.bright}Debug Mode:${colors.reset} ${colors.green}ENABLED${colors.reset}`);
+    console.log('🚀'.repeat(20) + '\n');
   }
 
   // Return server info for monitoring tools
